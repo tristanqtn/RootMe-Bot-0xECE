@@ -1,9 +1,5 @@
 import requests
-from bs4 import BeautifulSoup
 import sqlite3
-
-BASE_URL = "https://www.root-me.org"
-USERNAME = "RoiDechu"
 
 def init_db():
     conn = sqlite3.connect("rootme_data.db")
@@ -14,11 +10,13 @@ def init_db():
         place INTEGER,
         points INTEGER,
         challenges INTEGER,
-        compromissions INTEGER
+        compromissions INTEGER,
+        last_challenge TEXT
     )
     """)
     conn.commit()
     conn.close()
+
 
 def get_user_info(username):
     url = f"{BASE_URL}/{username}"
@@ -29,7 +27,7 @@ def get_user_info(username):
         print(f"Failed to get user info for {username} (Status code: {response.status_code})")
         return None
 
-def parse_user_data(html):
+'''def parse_user_data(html):
     soup = BeautifulSoup(html, 'html.parser')
     divs = soup.find_all("div", class_="small-6 medium-3 columns text-center")
 
@@ -39,9 +37,9 @@ def parse_user_data(html):
         label = div.find("span", class_="gras").get_text(strip=True)
         results[label] = value
 
-    return results
+    return results'''
 
-def save_user_data(username, results):
+'''def save_user_data(username, results):
     conn = sqlite3.connect("rootme_data.db")
     cursor = conn.cursor()
 
@@ -61,7 +59,34 @@ def save_user_data(username, results):
     """, (username, place, points, challenges, compromissions))
 
     conn.commit()
+    conn.close()'''
+
+def save_stats(stats):
+    conn = sqlite3.connect("rootme_data.db")
+    cursor = conn.cursor()
+    
+    for user in stats:
+        username = user['Username']
+        place = int(user['Place'])
+        points = int(user['Points'])
+        challenges = int(user['Challenges'])
+        compromissions = int(user['Compromissions'])
+        last_challenge = user['Last Challenge']
+
+        cursor.execute("""
+        INSERT INTO user_data (username, place, points, challenges, compromissions, last_challenge)
+        VALUES (?, ?, ?, ?, ?, ?)
+        ON CONFLICT(username) DO UPDATE SET
+            place=excluded.place,
+            points=excluded.points,
+            challenges=excluded.challenges,
+            compromissions=excluded.compromissions,
+            last_challenge=excluded.last_challenge
+        """, (username, place, points, challenges, compromissions, last_challenge))
+
+    conn.commit()
     conn.close()
+
 
 def get_user_data(username):
     conn = sqlite3.connect("rootme_data.db")
@@ -79,23 +104,3 @@ def get_all_user_data():
     conn.close()
     return all_data
 
-# Script principal
-init_db()
-data = get_user_info(USERNAME)
-
-if data:
-    results = parse_user_data(data)
-    save_user_data(USERNAME, results)
-
-    # Vérifier les données enregistrées
-    user_data = get_user_data(USERNAME)
-    if user_data:
-        print(f"Données pour {USERNAME} : {user_data}")
-
-    all_data = get_all_user_data()
-    if all_data:
-        print("Toutes les données enregistrées :")
-        for row in all_data:
-            print(f"Username: {row[0]}, Place: {row[1]}, Points: {row[2]}, Challenges: {row[3]}, Compromissions: {row[4]}")
-    else:
-        print("Aucune donnée enregistrée dans la base.")
