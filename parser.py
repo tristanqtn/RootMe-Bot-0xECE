@@ -24,6 +24,7 @@ async def get_user_data(username):
 # Parse the user data (extracting relevant details)
 def parse_user_data(username, data):
     stats = {}
+    stats["Username"] = username
     if data:
         # Parse the HTML content
         soup = BeautifulSoup(data, 'html.parser')
@@ -59,12 +60,14 @@ def parse_user_data(username, data):
 
 # Define an async function to fetch and parse user data for all users
 async def fetch_and_parse_users():
+    all_stats = []
     for username in users:
         data = await get_user_data(username)
         user_stats = parse_user_data(username, data)
-        print(f"Stats for {username}: {user_stats}")
-
+        all_stats.append(user_stats)
         await asyncio.sleep(1)  # Add a delay between requests to avoid rate limiting
+    return all_stats
 
 # Run the async tasks
-asyncio.run(fetch_and_parse_users())
+stats = asyncio.run(fetch_and_parse_users())
+print(stats)
