@@ -1,39 +1,70 @@
-import requests
+import asyncio
+import aiohttp
 from bs4 import BeautifulSoup
 
 BASE_URL = "https://www.root-me.org"
-USERNAME = "snaxx"
+users = ["Snaxx", "Mac-812606", "Hioav2", "Kalith", "RoiDechu", "Drachh", "draune", "AyWiZz"]
 
-def get_user_info(username):
+# Define a function to fetch user information with better error handling and timeout
+async def get_user_data(username):
     url = f"{BASE_URL}/{username}"
-    response = requests.get(url)
-    if response.status_code == 200:
-        return response.text
+    try:
+        # Use aiohttp to make the request asynchronously
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url, timeout=10) as response:  # Timeout set to 10 seconds
+                response.raise_for_status()  # Raise an exception for HTTP errors
+                return await response.text()  # Await the response text asynchronously
+    except asyncio.TimeoutError:
+        print(f"Request timed out while fetching data for {username}")
+        return None
+    except aiohttp.ClientError as e:
+        print(f"Error fetching data for {username}: {e}")
+        return None
+
+# Parse the user data (extracting relevant details)
+def parse_user_data(username, data):
+    stats = {}
+    if data:
+        # Parse the HTML content
+        soup = BeautifulSoup(data, 'html.parser')
+
+        # Find all the relevant divs
+        divs = soup.find_all("div", class_="small-6 medium-3 columns text-center")
+
+        # Extract labels and values
+        results = {}
+        for div in divs:
+            # Extract the value (text after &nbsp;)
+            value = div.find("h3").get_text(strip=True).split("\u00a0")[-1]
+            
+            # Extract the label (text inside <span class="gras">)
+            label = div.find("span", class_="gras").get_text(strip=True)
+            
+            # Store the result
+            results[label] = value
+
+        # Print the results for the current user
+        for label, value in results.items():
+            stats[label] = value
+
+        # Extract the last challenge
+        chall = soup.find("img", src="squelettes/img/activitees.svg?1570951387")
+        if chall:
+            chall = chall.find_next("a")
+            last_challenge = chall.get_text(strip=True)
+            stats["Last Challenge"] = last_challenge
+            return stats
     else:
-        print(response)
-        print(f"Failed to get user info for {username}")
+        print(f"Failed to fetch or parse data for {username}.")
 
-data = get_user_info(USERNAME)
+# Define an async function to fetch and parse user data for all users
+async def fetch_and_parse_users():
+    for username in users:
+        data = await get_user_data(username)
+        user_stats = parse_user_data(username, data)
+        print(f"Stats for {username}: {user_stats}")
 
-# Parse the HTML content
-soup = BeautifulSoup(data, 'html.parser')
+        await asyncio.sleep(1)  # Add a delay between requests to avoid rate limiting
 
-divs = soup.find_all("div", class_="small-6 medium-3 columns text-center")
-
-# Extract labels and values
-results = {}
-for div in divs:
-    # Extract the value (text after &nbsp;)
-    value = div.find("h3").get_text(strip=True).split("\u00a0")[-1]
-    
-    # Extract the label (text inside <span class="gras">)
-    label = div.find("span", class_="gras").get_text(strip=True)
-    
-    # Store the result
-    results[label] = value
-
-
-# Print the results
-for label, value in results.items():
-    print(f"{label}: {value}")
-
+# Run the async tasks
+asyncio.run(fetch_and_parse_users())
