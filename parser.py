@@ -69,5 +69,5 @@ async def fetch_and_parse_users():
     return all_stats
 
 # Run the async tasks
-stats = asyncio.run(fetch_and_parse_users())
-print(stats)
+'''stats = asyncio.run(fetch_and_parse_users())
+print(stats)'''
