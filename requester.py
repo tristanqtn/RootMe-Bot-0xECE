@@ -3,7 +3,18 @@ import aiohttp
 from bs4 import BeautifulSoup
 
 BASE_URL = "https://www.root-me.org"
-users = ["Snaxx", "Mac-812606", "Hioav2", "Kalith", "RoiDechu", "Drachh", "draune", "AyWiZz"]
+users = [
+    "Snaxx",
+    "Mac-812606",
+    "Hioav2",
+    "Kalith",
+    "RoiDechu",
+    "Drachh",
+    "draune",
+    "AyWiZz",
+    "0xECE",
+]
+
 
 # Define a function to fetch user information with better error handling and timeout
 async def get_user_data(username):
@@ -11,7 +22,9 @@ async def get_user_data(username):
     try:
         # Use aiohttp to make the request asynchronously
         async with aiohttp.ClientSession() as session:
-            async with session.get(url, timeout=10) as response:  # Timeout set to 10 seconds
+            async with session.get(
+                url, timeout=10
+            ) as response:  # Timeout set to 10 seconds
                 response.raise_for_status()  # Raise an exception for HTTP errors
                 return await response.text()  # Await the response text asynchronously
     except asyncio.TimeoutError:
@@ -21,13 +34,14 @@ async def get_user_data(username):
         print(f"Error fetching data for {username}: {e}")
         return None
 
+
 # Parse the user data (extracting relevant details)
 def parse_user_data(username, data):
     stats = {}
     stats["Username"] = username
     if data:
         # Parse the HTML content
-        soup = BeautifulSoup(data, 'html.parser')
+        soup = BeautifulSoup(data, "html.parser")
 
         # Find all the relevant divs
         divs = soup.find_all("div", class_="small-6 medium-3 columns text-center")
@@ -37,10 +51,10 @@ def parse_user_data(username, data):
         for div in divs:
             # Extract the value (text after &nbsp;)
             value = div.find("h3").get_text(strip=True).split("\u00a0")[-1]
-            
+
             # Extract the label (text inside <span class="gras">)
             label = div.find("span", class_="gras").get_text(strip=True)
-            
+
             # Store the result
             results[label] = value
 
@@ -58,6 +72,7 @@ def parse_user_data(username, data):
     else:
         print(f"Failed to fetch or parse data for {username}.")
 
+
 # Define an async function to fetch and parse user data for all users
 async def fetch_and_parse_users():
     all_stats = []
@@ -67,7 +82,3 @@ async def fetch_and_parse_users():
         all_stats.append(user_stats)
         await asyncio.sleep(1)  # Add a delay between requests to avoid rate limiting
     return all_stats
-
-# Run the async tasks
-'''stats = asyncio.run(fetch_and_parse_users())
-print(stats)'''
