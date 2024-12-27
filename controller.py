@@ -92,3 +92,5 @@ def detect_point_change(new_data):
             user["Increment"] = int(user["Points"]) - int(old_data[2])
             user_that_changed.append(user)
     return user_that_changed
+
+

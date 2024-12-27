@@ -3,7 +3,7 @@ import discord
 from discord.ext import tasks
 from discord.ext import commands
 
-from scenario import get_commentary
+from scenario import get_commentary, get_random_message
 from requester import fetch_and_parse_users
 from controller import (
     save_stats,
@@ -101,25 +101,27 @@ async def leaderboard(ctx):
     await ctx.send(message)
 
 
-@tasks.loop(minutes=1)  # Set to 30 minutes interval
+@tasks.loop(minutes=1)
 async def periodic_task():
-    init_db()  # Initialize DB if necessary
-    stats = await fetch_and_parse_users()  # Fetch and parse user data
+    init_db()
+    stats = await fetch_and_parse_users()
     point_change = detect_point_change(stats)
 
     if point_change:
-        channel = bot.get_channel(1312171714272297065)  # Get the channel by ID
+        channel = bot.get_channel(1312171714272297065)
         if channel is not None:
             for user in point_change:
-                message = (
-                    f"🎉 Points changed for {user['Username']}! "
-                    f"Increment: {user['Increment']}, Last Challenge: {user['Last Challenge']}"
+                # Générer un message aléatoire
+                message = get_random_message(
+                    username=user['Username'],
+                    increment=user['Increment'],
+                    last_challenge=user['Last Challenge']
                 )
                 await channel.send(message)
         else:
             print(f"Channel with ID {1312171714272297065} not found.")
 
-    save_stats(stats)  # Save fetched stats
+    save_stats(stats)
     all_data = get_all_user_data()
 
     if all_data:

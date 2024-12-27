@@ -3,7 +3,7 @@ import aiohttp
 from bs4 import BeautifulSoup
 
 BASE_URL = "https://www.root-me.org"
-users = ["Mac-812606", "Drachh", "Snaxx", "NathanTmor"]
+users = ["Mac-812606", "Drachh", "Snaxx", "NathanTmor", "Kalith", "Hioav2", "RoiDechu"]
 
 
 # Define a function to fetch user information with better error handling and timeout
