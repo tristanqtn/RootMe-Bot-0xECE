@@ -3,7 +3,7 @@ import discord
 from discord.ext import tasks
 from discord.ext import commands
 
-from scenario import get_commentary, calculate_points_needed
+from scenario import get_commentary
 from requester import fetch_and_parse_users
 from controller import (
     save_stats,
@@ -11,6 +11,7 @@ from controller import (
     init_db,
     detect_point_change,
     get_leaderboard,
+    calculate_points_needed
 )
 
 TOKEN = "MTMyMTgzNDI4NzExNjMyMDgzOA.G0F6U7.mfTzYHAAjCuqKyaIHltNgHaCis5UoqxFldDrbw"
@@ -104,7 +105,20 @@ async def leaderboard(ctx):
 async def periodic_task():
     init_db()  # Initialize DB if necessary
     stats = await fetch_and_parse_users()  # Fetch and parse user data
-    detect_point_change(stats)
+    point_change = detect_point_change(stats)
+
+    if point_change:
+        channel = bot.get_channel(1312171714272297065)  # Get the channel by ID
+        if channel is not None:
+            for user in point_change:
+                message = (
+                    f"🎉 Points changed for {user['Username']}! "
+                    f"Increment: {user['Increment']}, Last Challenge: {user['Last Challenge']}"
+                )
+                await channel.send(message)
+        else:
+            print(f"Channel with ID {1312171714272297065} not found.")
+
     save_stats(stats)  # Save fetched stats
     all_data = get_all_user_data()
 
