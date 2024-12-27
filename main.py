@@ -1,11 +1,13 @@
 import discord
 import sqlite3
 
+
 from discord.ext import tasks
 from discord.ext import commands
 
+from scenario import get_commentary, calculate_points_needed
 from requester import fetch_and_parse_users
-from controller import save_stats, get_all_user_data, init_db, detect_point_change
+from controller import save_stats, get_all_user_data, init_db, detect_point_change, get_leaderboard 
 
 TOKEN = "MTMyMTgzNDI4NzExNjMyMDgzOA.G0F6U7.mfTzYHAAjCuqKyaIHltNgHaCis5UoqxFldDrbw"
 
@@ -15,29 +17,51 @@ intents.message_content = True
 intents.typing = False
 intents.presences = False
 
+# Fonction pour envoyer un message privé à X lui rappelant son retard
+async def send_reminder_to_user(user, target_user, points_needed):
+    try:
+        message = f"Désolé Erling, il te manque encore **{points_needed}** points pour rattraper **{target_user}**. N’abandonne pas… ou fais-le."
+        target = await bot.fetch_user(user)  # On cherche l'utilisateur pour lui envoyer le message privé
+        await target.send(message)  # Envoi du message
+    except discord.DiscordException as e:
+        print(f"Erreur lors de l'envoi du message à {user}: {e}")
 
-# Connexion à la base de données
-def get_leaderboard():
-    conn = sqlite3.connect("rootme_data.db")
-    cursor = conn.cursor()
-    cursor.execute("SELECT username, points FROM user_data ORDER BY points DESC")
-    leaderboard = cursor.fetchall()  # Récupère tous les utilisateurs triés par points
-    conn.close()
-    return leaderboard
+# Fonction pour envoyer les rappels au démarrage du bot
+async def send_race_reminders():
+    # Définis ici les deux utilisateurs à comparer
+    user1 = "Mac-812606"  # Utilisateur 1
+    user2 = "Drachh"     # Utilisateur 2
+    user3 = "Snaxx"
 
+    discordUser1 = "756178270830985286"
+    
+    leaderboard = get_leaderboard()
 
-# Fonction pour déterminer le commentaire à afficher
-def get_commentary(points):
-    if points < 1000:
-        return "- encore vachement loin des 4000"
-    elif points < 2000:
-        return "- tu commences à t'approcher des 4000 !"
-    elif points < 3000:
-        return "- presque au top, encore un peu d'effort !"
-    elif points < 4000:
-        return "- ça y est, tu es dans la course !"
-    else:
-        return "- Top niveau ! 💪"
+    # Recherche des points des deux utilisateurs
+    user1_points = None
+    user2_points = None
+
+    for username, points in leaderboard:
+        if username == user1:
+            user1_points = points
+        elif username == user2:
+            user2_points = points
+        elif username == user3:
+            user3_points = points
+
+    # Si les points des deux utilisateurs sont trouvés
+    if user1_points is not None and user2_points is not None and user3_points is not None:
+        # Calcul du nombre de points manquants pour chaque utilisateur
+        points_needed_for_user1 = calculate_points_needed(user1_points, user2_points)
+        points_needed_for_user1bis = calculate_points_needed(user1_points, user3_points)
+
+        # Envoi des rappels si nécessaire
+        if points_needed_for_user1 > 0:
+            await send_reminder_to_user(discordUser1, user2, points_needed_for_user1)
+        if points_needed_for_user1bis > 0:
+            await send_reminder_to_user(discordUser1, user3, points_needed_for_user1bis)
+        else:
+            print(f"Erreur : Les utilisateurs {user1} ou {user2} ou {user3} n'ont pas été trouvés dans la base de données.")
 
 
 # Commande !leaderboard
@@ -64,7 +88,7 @@ async def leaderboard(ctx):
 
 @tasks.loop(minutes=10)  # Set to 30 minutes interval
 async def periodic_task():
-    await init_db()  # Initialize DB if necessary
+    init_db()  # Initialize DB if necessary
     stats = await fetch_and_parse_users()  # Fetch and parse user data
     detect_point_change(stats)
     await save_stats(stats)  # Save fetched stats
@@ -98,6 +122,8 @@ async def on_ready():
         await channel.send("Nathan pu du zob 🚀")
     else:
         print("Channel introuvable !")
+
+    await send_race_reminders()
 
 
 bot.run(TOKEN)
