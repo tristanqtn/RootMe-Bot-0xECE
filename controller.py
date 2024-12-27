@@ -47,6 +47,7 @@ def save_stats(stats):
     conn.commit()
     conn.close()
 
+
 # Connexion à la base de données
 def get_leaderboard():
     conn = sqlite3.connect("rootme_data.db")
@@ -56,9 +57,11 @@ def get_leaderboard():
     conn.close()
     return leaderboard
 
-def calculate_points_needed(x_points, y_points):
-    return max(0, y_points - x_points)  # Si X est déjà devant Y, il ne manque aucun point
 
+def calculate_points_needed(x_points, y_points):
+    return max(
+        0, y_points - x_points
+    )  # Si X est déjà devant Y, il ne manque aucun point
 
 
 def get_user_data(username):
@@ -80,7 +83,12 @@ def get_all_user_data():
 
 
 def detect_point_change(new_data):
+    user_that_changed = []
     for user in new_data:
         old_data = get_user_data(user["Username"])
-        if int(user["Points"]) != int(old_data["Points"]):
-            print(user, int(user["Points"]) - int(old_data["Points"]))
+        if old_data is None:
+            break
+        if int(user["Points"]) != int(old_data[2]):
+            user["Increment"] = int(user["Points"]) - int(old_data[2])
+            user_that_changed.append(user)
+    return user_that_changed

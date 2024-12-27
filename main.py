@@ -1,13 +1,17 @@
 import discord
-import sqlite3
-
 
 from discord.ext import tasks
 from discord.ext import commands
 
 from scenario import get_commentary, calculate_points_needed
 from requester import fetch_and_parse_users
-from controller import save_stats, get_all_user_data, init_db, detect_point_change, get_leaderboard 
+from controller import (
+    save_stats,
+    get_all_user_data,
+    init_db,
+    detect_point_change,
+    get_leaderboard,
+)
 
 TOKEN = "MTMyMTgzNDI4NzExNjMyMDgzOA.G0F6U7.mfTzYHAAjCuqKyaIHltNgHaCis5UoqxFldDrbw"
 
@@ -17,24 +21,28 @@ intents.message_content = True
 intents.typing = False
 intents.presences = False
 
+
 # Fonction pour envoyer un message privé à X lui rappelant son retard
 async def send_reminder_to_user(user, target_user, points_needed):
     try:
         message = f"Désolé Erling, il te manque encore **{points_needed}** points pour rattraper **{target_user}**. N’abandonne pas… ou fais-le."
-        target = await bot.fetch_user(user)  # On cherche l'utilisateur pour lui envoyer le message privé
+        target = await bot.fetch_user(
+            user
+        )  # On cherche l'utilisateur pour lui envoyer le message privé
         await target.send(message)  # Envoi du message
     except discord.DiscordException as e:
         print(f"Erreur lors de l'envoi du message à {user}: {e}")
+
 
 # Fonction pour envoyer les rappels au démarrage du bot
 async def send_race_reminders():
     # Définis ici les deux utilisateurs à comparer
     user1 = "Mac-812606"  # Utilisateur 1
-    user2 = "Drachh"     # Utilisateur 2
+    user2 = "Drachh"  # Utilisateur 2
     user3 = "Snaxx"
 
     discordUser1 = "756178270830985286"
-    
+
     leaderboard = get_leaderboard()
 
     # Recherche des points des deux utilisateurs
@@ -50,7 +58,11 @@ async def send_race_reminders():
             user3_points = points
 
     # Si les points des deux utilisateurs sont trouvés
-    if user1_points is not None and user2_points is not None and user3_points is not None:
+    if (
+        user1_points is not None
+        and user2_points is not None
+        and user3_points is not None
+    ):
         # Calcul du nombre de points manquants pour chaque utilisateur
         points_needed_for_user1 = calculate_points_needed(user1_points, user2_points)
         points_needed_for_user1bis = calculate_points_needed(user1_points, user3_points)
@@ -61,10 +73,11 @@ async def send_race_reminders():
         if points_needed_for_user1bis > 0:
             await send_reminder_to_user(discordUser1, user3, points_needed_for_user1bis)
         else:
-            print(f"Erreur : Les utilisateurs {user1} ou {user2} ou {user3} n'ont pas été trouvés dans la base de données.")
+            print(
+                f"Erreur : Les utilisateurs {user1} ou {user2} ou {user3} n'ont pas été trouvés dans la base de données."
+            )
 
 
-# Commande !leaderboard
 @bot.command(name="leaderboard")
 async def leaderboard(ctx):
     leaderboard = get_leaderboard()
@@ -73,25 +86,26 @@ async def leaderboard(ctx):
         await ctx.send("Il n'y a pas de données dans la base.")
         return
 
-    # Création du message à envoyer
-    message = "🏆 **Leaderboard des utilisateurs** 🏆\n"
-    message += "\n".join(
-        [
-            f"{i+1}. **{user[0]}** - {user[1]} points  {get_commentary(user[1]) if user[0] == 'Mac-812606' else ''}"
-            for i, user in enumerate(leaderboard)
-        ]
-    )
+    # Création du tableau formaté
+    message = "```markdown\n"
+    message += "🏆 LEADERBOARD DES JOUEURS 🏆\n"
+    message += f"{'Pos':<4} {'Utilisateur':<20} {'Points':>6} {'Commentaire':<30}\n"
+    message += "-" * 64 + "\n"
+    for i, user in enumerate(leaderboard, start=1):
+        commentary = get_commentary(user[1]) if user[0] == "Mac-812606" else ""
+        message += f"{i:<4} {user[0]:<20} {user[1]:>6} {commentary:<30}\n"
+    message += "```"
 
     # Envoi du message
     await ctx.send(message)
 
 
-@tasks.loop(minutes=10)  # Set to 30 minutes interval
+@tasks.loop(minutes=1)  # Set to 30 minutes interval
 async def periodic_task():
     init_db()  # Initialize DB if necessary
     stats = await fetch_and_parse_users()  # Fetch and parse user data
     detect_point_change(stats)
-    await save_stats(stats)  # Save fetched stats
+    save_stats(stats)  # Save fetched stats
     all_data = get_all_user_data()
 
     if all_data:

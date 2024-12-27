@@ -3,17 +3,7 @@ import aiohttp
 from bs4 import BeautifulSoup
 
 BASE_URL = "https://www.root-me.org"
-users = [
-    "Snaxx",
-    "Mac-812606",
-    "Hioav2",
-    "Kalith",
-    "RoiDechu",
-    "Drachh",
-    "draune",
-    "AyWiZz",
-    "0xECE",
-]
+users = ["Mac-812606", "Drachh", "Snaxx", "NathanTmor"]
 
 
 # Define a function to fetch user information with better error handling and timeout
@@ -23,7 +13,7 @@ async def get_user_data(username):
         # Use aiohttp to make the request asynchronously
         async with aiohttp.ClientSession() as session:
             async with session.get(
-                url, timeout=10
+                url, timeout=20
             ) as response:  # Timeout set to 10 seconds
                 response.raise_for_status()  # Raise an exception for HTTP errors
                 return await response.text()  # Await the response text asynchronously
@@ -71,6 +61,7 @@ def parse_user_data(username, data):
             return stats
     else:
         print(f"Failed to fetch or parse data for {username}.")
+        return None
 
 
 # Define an async function to fetch and parse user data for all users
@@ -78,7 +69,10 @@ async def fetch_and_parse_users():
     all_stats = []
     for username in users:
         data = await get_user_data(username)
-        user_stats = parse_user_data(username, data)
-        all_stats.append(user_stats)
-        await asyncio.sleep(1)  # Add a delay between requests to avoid rate limiting
+        if data is None:
+            continue
+        else:
+            user_stats = parse_user_data(username, data)
+            all_stats.append(user_stats)
+        await asyncio.sleep(5)  # Add a delay between requests to avoid rate limiting
     return all_stats
