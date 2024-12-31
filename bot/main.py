@@ -132,7 +132,7 @@ async def player_stats(ctx):
         message += "Gros pourri de merde, pas de 4000 pts : pas de stats !\n"
     else:
         message += f"Hey {user_pseudo}, tu es en train d'arracher ça, regarde-moi ces stats de fou :\n"
-        message += f"{'Place':<12}: {stats[1]}\n"
+        message += f"{'Place':<12}: {stats[1]}/325710\n"
         message += f"{'Points':<12}: {stats[2]}\n"
         message += f"{'Challenges':<12}: {stats[3]}\n"
         message += f"{'Compromissions':<12}: {stats[4]}\n"

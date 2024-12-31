@@ -12,6 +12,8 @@ ROOT_ME_USERS = [
     "draune",
     "Snaxx",
     "AyWiZz",
+    "Xeroxx75",
+    "Onyx-852889",
 ]
 
 
