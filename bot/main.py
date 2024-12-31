@@ -144,6 +144,41 @@ async def player_stats(ctx):
     # Envoi du message
     await ctx.send(message)
 
+@bot.command(name="refresh")
+async def refresh(ctx):
+    await ctx.send("Données en cours de mise à jour ...")
+    await ctx.send("Cela peut prendre quelques secondes, veuillez patienter (bot busy)...")
+
+    init_db()
+    stats = await fetch_and_parse_users()
+    point_change = detect_point_change(stats)
+
+    if point_change:
+        channel = bot.get_channel(1312171714272297065)
+        if channel is not None:
+            for user in point_change:
+                # Générer un message aléatoire
+                message = get_random_message(
+                    username=user["Username"],
+                    increment=user["Increment"],
+                    last_challenge=user["Last Challenge"],
+                )
+                await channel.send(message)
+        else:
+            print(f"Channel with ID {1312171714272297065} not found.")
+    save_stats(stats)
+    all_data = get_all_user_data()
+
+    if all_data:
+        print("The data has been updated")
+        for row in all_data:
+            print(
+                f"Username: {row[0]}, Place: {row[1]}, Points: {row[2]}, Challenges: {row[3]}, Compromissions: {row[4]}"
+            )
+        await ctx.send("Les données ont été mises à jour.")
+    else:
+        print("Aucune donnée enregistrée dans la base.")
+
 
 @bot.command(name="countdown")
 async def countdown(ctx):
