@@ -3,15 +3,15 @@ import discord
 from discord.ext import tasks
 from discord.ext import commands
 
-from scenario import get_commentary, get_random_message
-from requester import fetch_and_parse_users
-from controller import (
+from bot.scenario import get_commentary, get_random_message
+from bot.requester import fetch_and_parse_users
+from bot.controller import (
     save_stats,
     get_all_user_data,
     init_db,
     detect_point_change,
     get_leaderboard,
-    calculate_points_needed
+    calculate_points_needed,
 )
 
 TOKEN = "MTMyMTgzNDI4NzExNjMyMDgzOA.G0F6U7.mfTzYHAAjCuqKyaIHltNgHaCis5UoqxFldDrbw"
@@ -113,9 +113,9 @@ async def periodic_task():
             for user in point_change:
                 # Générer un message aléatoire
                 message = get_random_message(
-                    username=user['Username'],
-                    increment=user['Increment'],
-                    last_challenge=user['Last Challenge']
+                    username=user["Username"],
+                    increment=user["Increment"],
+                    last_challenge=user["Last Challenge"],
                 )
                 await channel.send(message)
         else:
@@ -125,7 +125,7 @@ async def periodic_task():
     all_data = get_all_user_data()
 
     if all_data:
-        print("Toutes les données enregistrées :")
+        print("Data updated")
         for row in all_data:
             print(
                 f"Username: {row[0]}, Place: {row[1]}, Points: {row[2]}, Challenges: {row[3]}, Compromissions: {row[4]}"

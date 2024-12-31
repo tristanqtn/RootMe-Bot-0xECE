@@ -1,6 +1,7 @@
 # Fonction pour déterminer le commentaire à afficher
 import random
-from controller import get_leaderboard, calculate_points_needed
+from bot.controller import get_leaderboard, calculate_points_needed
+
 
 def get_commentary(points):
     if points < 1000:
@@ -10,7 +11,7 @@ def get_commentary(points):
             "- Si tu continues à ce rythme, les 4000 points resteront un fantasme.",
             "- Peut-être qu'un jour tu atteindras les 1000 points, mais bon, faut pas rêver.",
             "- À ce rythme, c’est pas demain la veille que tu seras dans la course.",
-            "- Va peut etre falloir rester dans le projet Centrale, les CTF c'est pas ça visiblement"
+            "- Va peut etre falloir rester dans le projet Centrale, les CTF c'est pas ça visiblement",
         ]
     elif points < 1500:
         messages = [
@@ -18,7 +19,7 @@ def get_commentary(points):
             "- On dirait bien que tu viens de découvrir que le jeu existe.",
             "- T'es pas encore à la vitesse d'un escargot, mais c'est pas loin.",
             "- Tu te rapproches... mais t’es encore bien derrière.",
-            "- Si tu fais un petit effort, tu finiras par faire partie de la course... un jour."
+            "- Si tu fais un petit effort, tu finiras par faire partie de la course... un jour.",
         ]
     elif points < 2000:
         messages = [
@@ -26,7 +27,7 @@ def get_commentary(points):
             "- Ah, tu bouges ! Mais t’es toujours pas dans le top.",
             "- C’est bien, mais faudrait peut-être accélérer un peu si tu veux jouer dans la cour des grands.",
             "- T’es toujours là, mais tu n'es même pas encore à mi-chemin de 4000 points.",
-            "- T'es sur la bonne voie, mais faut vraiment te bouger si tu veux rivaliser."
+            "- T'es sur la bonne voie, mais faut vraiment te bouger si tu veux rivaliser.",
         ]
     elif points < 2500:
         messages = [
@@ -34,7 +35,7 @@ def get_commentary(points):
             "- T'es plus proche, mais encore un peu trop lent pour les vrais champions.",
             "- T'as atteint un certain niveau, mais t’es encore trop loin des meilleurs.",
             "- Tu commences à comprendre, mais la route est encore longue.",
-            "- Avec un peu de chance, tu finiras bien par rattraper les autres."
+            "- Avec un peu de chance, tu finiras bien par rattraper les autres.",
         ]
     elif points < 3000:
         messages = [
@@ -42,7 +43,7 @@ def get_commentary(points):
             "- Un peu plus de travail, et tu seras dans la course. Mais attention, ça chauffe derrière.",
             "- Presque là ! Mais est-ce que tu as ce qu'il faut pour franchir la ligne d’arrivée ?",
             "- L'effort commence à payer, mais faut pas lâcher maintenant !",
-            "- Encore un petit coup de collier et tu peux prétendre à un vrai classement."
+            "- Encore un petit coup de collier et tu peux prétendre à un vrai classement.",
         ]
     elif points < 3500:
         messages = [
@@ -50,7 +51,7 @@ def get_commentary(points):
             "- T'es dans la course, mais faut vraiment appuyer sur l'accélérateur.",
             "- Bien joué, mais ce n’est pas encore suffisant pour prétendre au podium.",
             "- C’est mieux, mais tu dois encore dépasser les autres. Ça va être difficile.",
-            "- T'as fait du progrès, mais faudrait vraiment que tu te lèves pour aller chercher les 4000."
+            "- T'as fait du progrès, mais faudrait vraiment que tu te lèves pour aller chercher les 4000.",
         ]
     elif points < 4000:
         messages = [
@@ -58,7 +59,7 @@ def get_commentary(points):
             "- Bien joué, tu fais enfin honneur à la compétition, mais t’es encore trop loin des top joueurs.",
             "- T'es presque là, mais les autres sont déjà en train de te dépasser.",
             "- T’es au niveau, mais y’a encore de la marge pour les vrais champions.",
-            "- Tu as bien progressé, mais faut te bouger encore un peu pour atteindre la ligne d’arrivée."
+            "- Tu as bien progressé, mais faut te bouger encore un peu pour atteindre la ligne d’arrivée.",
         ]
     else:
         messages = [
@@ -66,9 +67,9 @@ def get_commentary(points):
             "- T'as atteint le sommet... mais c’est sûrement grâce à des raccourcis, non ?",
             "- Bravo, t'es au top... mais je parie que tu as payé un service pour y arriver.",
             "- T'es un champion, mais on sait tous que tu triches.",
-            "- Félicitations, t'es un modèle... mais pour les autres à ne pas suivre."
+            "- Félicitations, t'es un modèle... mais pour les autres à ne pas suivre.",
         ]
-    
+
     # Retourne un message choisi aléatoirement parmi ceux de la tranche
     return random.choice(messages)
 
@@ -118,7 +119,7 @@ TEMPLATES = [
     "💣 **{username}** a fait sauter tous les obstacles avec **{increment} points** et remporte **{last_challenge}** haut la main !",
     "⏰ **{username}** prend de l'avance, remportant **{increment} points** sur **{last_challenge}**. Qui peut le rattraper ?",
     "🔥 **{username}** est en feu, il enchaîne les victoires avec **{increment} points** sur **{last_challenge}**. Incroyable !",
-     "🚀 **{username}** vient de franchir la ligne d'arrivée avec **{increment} points** sur **{last_challenge}** ! Il a pris l'ascenseur pour le sommet. Qui peut le suivre ? 🤩",
+    "🚀 **{username}** vient de franchir la ligne d'arrivée avec **{increment} points** sur **{last_challenge}** ! Il a pris l'ascenseur pour le sommet. Qui peut le suivre ? 🤩",
     "🎉 **{username}** vient de pulvériser les attentes avec **{increment} points** grâce à **{last_challenge}**. Si c'était un film, ce serait un blockbuster à succès ! 🍿",
     "🌪️ Le vent souffle fort et il porte **{username}** jusqu'à **{increment} points** ! **{last_challenge}** ? C'est du gâteau pour lui. 🍰",
     "🔥 **{username}** ne fait pas dans la dentelle et sort **{increment} points** de son chapeau magique. Le challenge **{last_challenge}** ? Abandonné dans sa poussière ! 🎩✨",
@@ -147,8 +148,7 @@ TEMPLATES = [
     "🔐 **{username}** a ouvert la porte du succès avec **{increment} points** sur **{last_challenge}**. Aucun code n'est assez compliqué pour lui ! 🗝️",
     "💨 **{username}** a pris la route la plus rapide pour ajouter **{increment} points** à son total. Qui peut le rattraper à ce rythme ? 🛣️",
     "🌈 **{username}** a créé un arc-en-ciel de **{increment} points** après avoir terminé **{last_challenge}**. Magique, non ? 🌟",
-    "🍾 **{username}** vient de déboucher une bouteille de succès avec **{increment} points** après avoir brillamment résolu **{last_challenge}**. Champagne pour tout le monde ! 🥂"
-
+    "🍾 **{username}** vient de déboucher une bouteille de succès avec **{increment} points** après avoir brillamment résolu **{last_challenge}**. Champagne pour tout le monde ! 🥂",
 ]
 
 
@@ -230,27 +230,24 @@ TAUNTS_FOR_MAC = [
     "Le top 1 t’envoie ses salutations… mais t’inquiète, il a déjà fait trois tours de circuit pendant que tu cherches encore ton chemin. 🏁",
     "À ce point, <@688857965553516623>, je pense que t’es plus un fan que vraiment un compétiteur. 📱🎮",
     "Oh <@688857965553516623>, tu sais ce qu’on dit : si tu restes trop longtemps derrière, tu finis par être oublié. Bienvenue dans l'oubli. 💀",
-
 ]
-
-
-
 
 
 # Dictionnaire associant les usernames aux IDs Discord
 DISCORD_USER_IDS = {
-    "Mac-812606": 123456789012345678,  # Remplacez par l'ID réel de l'utilisateur
-    "Drachh": 756178270830985286,     # Ajouter autant d'utilisateurs que nécessaire
-    "Snaxx" : 445640456852865056,
-    "NathanTmor" : 445640456852865056,
-    "Kalith" : 441332639866028032,
-    "Hioav2" : 261109633110900736,
-    "RoiDechu" : 258989334537961472,
-    "draune" : 905515340149194782,
-    "AyWiZz" : 261164359269482498
-
+    # Remplacez par l'ID réel de l'utilisateur
+    "Drachh": 756178270830985286,  # Ajouter autant d'utilisateurs que nécessaire
+    "Kalith": 441332639866028032,
+    "Hioav2": 261109633110900736,
+    "RoiDechu": 258989334537961472,
+    "Mac-812606": 123456789012345678,
+    "draune": 905515340149194782,
+    "Snaxx": 445640456852865056,
+    "AyWiZz": 261164359269482498,
     # Ajoutez d'autres mappings ici
 }
+
+
 def get_random_message(username, increment, last_challenge):
     """
     Sélectionne un message aléatoire parmi les templates et remplace les variables.
@@ -264,16 +261,18 @@ def get_random_message(username, increment, last_challenge):
     """
     # Sélectionne un template pour le message principal
     template = random.choice(TEMPLATES)
-    
+
     # Cherche l'ID Discord de l'utilisateur
     discord_id = DISCORD_USER_IDS.get(username)
-    
+
     # Crée la mention pour l'utilisateur
     mention = f"<@{discord_id}>" if discord_id else username
-    
+
     # Message principal
-    primary_message = template.format(username=mention, increment=increment, last_challenge=last_challenge)
-    
+    primary_message = template.format(
+        username=mention, increment=increment, last_challenge=last_challenge
+    )
+
     leaderboard = get_leaderboard()
 
     # Recherche des points des deux utilisateurs
@@ -286,18 +285,17 @@ def get_random_message(username, increment, last_challenge):
         elif username_leaderboard == username:
             user_points = points
 
-
     # Si les points des deux utilisateurs sont trouvés
     if user_points is not None and mac_points is not None:
         # Calcul du nombre de points manquants pour chaque utilisateur
         points_needed_for_mac = calculate_points_needed(mac_points, user_points)
-    
+
     # Si la personne n'est pas Mac et a plus de points que lui, ajoute un taunt
     taunt_message = None
     if username != "Mac-812606" and points_needed_for_mac > 0:
         taunt_template = random.choice(TAUNTS_FOR_MAC)
         taunt_message = taunt_template.format(winner_username=mention)
-    
+
     # Retourne les messages (le taunt est optionnel)
     if taunt_message:
         # Retourne le message principal suivi du taunt sur une nouvelle ligne

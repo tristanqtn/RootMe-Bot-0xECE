@@ -3,7 +3,16 @@ import aiohttp
 from bs4 import BeautifulSoup
 
 BASE_URL = "https://www.root-me.org"
-users = ["Mac-812606", "Drachh", "Snaxx", "NathanTmor", "Kalith", "Hioav2", "RoiDechu"]
+ROOT_ME_USERS = [
+    "Drachh",
+    "Kalith",
+    "Hioav2",
+    "RoiDechu",
+    "Mac-812606",
+    "draune",
+    "Snaxx",
+    "AyWiZz",
+]
 
 
 # Define a function to fetch user information with better error handling and timeout
@@ -67,7 +76,7 @@ def parse_user_data(username, data):
 # Define an async function to fetch and parse user data for all users
 async def fetch_and_parse_users():
     all_stats = []
-    for username in users:
+    for username in ROOT_ME_USERS:
         data = await get_user_data(username)
         if data is None:
             continue
