@@ -144,10 +144,13 @@ async def player_stats(ctx):
     # Envoi du message
     await ctx.send(message)
 
+
 @bot.command(name="refresh")
 async def refresh(ctx):
     await ctx.send("Données en cours de mise à jour ...")
-    await ctx.send("Cela peut prendre quelques secondes, veuillez patienter (bot busy)...")
+    await ctx.send(
+        "Cela peut prendre quelques secondes, veuillez patienter (bot busy)..."
+    )
 
     init_db()
     stats = await fetch_and_parse_users()
