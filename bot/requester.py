@@ -1,6 +1,6 @@
 import asyncio
-import aiohttp
-from bs4 import BeautifulSoup
+import aiohttp  # type: ignore
+from bs4 import BeautifulSoup  # type: ignore
 
 BASE_URL = "https://www.root-me.org"
 ROOT_ME_USERS = [

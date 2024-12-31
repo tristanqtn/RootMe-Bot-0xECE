@@ -1,8 +1,8 @@
-import discord
+import discord  # type: ignore
 
 from datetime import datetime
-from discord.ext import tasks
-from discord.ext import commands
+from discord.ext import tasks  # type: ignore
+from discord.ext import commands  # type: ignore
 
 from bot.scenario import get_commentary, get_random_message, DISCORD_USER_IDS
 from bot.requester import fetch_and_parse_users
@@ -13,7 +13,7 @@ from bot.controller import (
     detect_point_change,
     get_leaderboard,
     calculate_points_needed,
-    get_user_data
+    get_user_data,
 )
 
 TOKEN = "MTMyMTgzNDI4NzExNjMyMDgzOA.G0F6U7.mfTzYHAAjCuqKyaIHltNgHaCis5UoqxFldDrbw"
@@ -80,6 +80,7 @@ async def send_race_reminders():
                 f"Erreur : Les utilisateurs {user1} ou {user2} ou {user3} n'ont pas été trouvés dans la base de données."
             )
 
+
 @bot.command(name="commandes")
 async def commandes(ctx):
     message = "```markdown\n"
@@ -90,6 +91,7 @@ async def commandes(ctx):
     message += "- !countdown : Affiche le nombre de jours avant le 1er avril 2025\n"
     message += "```"
     await ctx.send(message)
+
 
 @bot.command(name="leaderboard")
 async def leaderboard(ctx):
@@ -112,9 +114,9 @@ async def leaderboard(ctx):
     # Envoi du message
     await ctx.send(message)
 
+
 @bot.command(name="stats")
 async def player_stats(ctx):
-
     # Retrieve user ID that ran the command
     user_id = ctx.author.id
     # Get the pseudo of the user that ran the command using DISCORD_USER_IDS
@@ -142,9 +144,9 @@ async def player_stats(ctx):
     # Envoi du message
     await ctx.send(message)
 
+
 @bot.command(name="countdown")
 async def countdown(ctx):
-
     # Retrieve user ID that ran the command
     user_id = ctx.author.id
     # Get the pseudo of the user that ran the command using DISCORD_USER_IDS
@@ -161,20 +163,22 @@ async def countdown(ctx):
     delta = date_1_avril_2025 - date
     days = delta.days
 
-
     # Création du tableau formaté
     message = "```markdown\n"
     message += "COMPTE A REBOURS\n"
     if stats[0] == "Mac-812606":
         message += f"De toute façon, tu n'arriveras jamais à 4000 points mais bon si tu veux quand même savoir, il te reste : {days+1} jours pour y arriver\n"
     else:
-        message += f"Chill ya pas de compte à rebours pour toi, tu n'as pas de problèmes d'ego toi !\n"
-        message += f"Mais si tu veux savoir, il te reste : {days+1} jours avant le FIC2025\n"
+        message += "Chill ya pas de compte à rebours pour toi, tu n'as pas de problèmes d'ego toi !\n"
+        message += (
+            f"Mais si tu veux savoir, il te reste : {days+1} jours avant le FIC2025\n"
+        )
 
     message += "```"
 
     # Envoi du message
     await ctx.send(message)
+
 
 @tasks.loop(minutes=5)
 async def periodic_task():
