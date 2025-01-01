@@ -1,7 +1,8 @@
 version: "3.8"
+
 services:
-  backend:
+  bot:
     build:
-      context: ./
-      dockerfile: Dockerfile
-    container_name: NathanTMor
+      context: .
+    image: bot
+    restart: always
