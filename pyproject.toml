@@ -12,6 +12,7 @@ discord = "^2.3.2"
 asyncio = "^3.4.3"
 aiohttp = "^3.11.11"
 discord-py = "^2.4.0"
+python-dotenv = "^1.0.1"
 
 
 [tool.poetry.group.dev.dependencies]

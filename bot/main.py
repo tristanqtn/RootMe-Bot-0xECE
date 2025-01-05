@@ -1,4 +1,7 @@
+import os
 import discord  # type: ignore
+
+from dotenv import load_dotenv
 
 from datetime import datetime
 from discord.ext import tasks  # type: ignore
@@ -16,7 +19,15 @@ from bot.controller import (
     get_user_data,
 )
 
-TOKEN = "MTMyMTgzNDI4NzExNjMyMDgzOA.G0F6U7.mfTzYHAAjCuqKyaIHltNgHaCis5UoqxFldDrbw"
+
+
+load_dotenv()
+
+TOKEN = os.getenv("DISCORD_TOKEN")
+CHANNEL_ID = int(os.getenv("CHANNEL_ID"))
+
+
+
 
 intents = discord.Intents.default()
 bot = commands.Bot(command_prefix="!", intents=intents)
@@ -157,7 +168,7 @@ async def refresh(ctx):
     point_change = detect_point_change(stats)
 
     if point_change:
-        channel = bot.get_channel(1312171714272297065)
+        channel = bot.get_channel(CHANNEL_ID)
         if channel is not None:
             for user in point_change:
                 # Générer un message aléatoire
@@ -168,7 +179,7 @@ async def refresh(ctx):
                 )
                 await channel.send(message)
         else:
-            print(f"Channel with ID {1312171714272297065} not found.")
+            print(f"Channel with ID {CHANNEL_ID} not found.")
     save_stats(stats)
     all_data = get_all_user_data()
 
@@ -225,7 +236,7 @@ async def periodic_task():
     point_change = detect_point_change(stats)
 
     if point_change:
-        channel = bot.get_channel(1312171714272297065)
+        channel = bot.get_channel(CHANNEL_ID)
         if channel is not None:
             for user in point_change:
                 # Générer un message aléatoire
@@ -236,7 +247,7 @@ async def periodic_task():
                 )
                 await channel.send(message)
         else:
-            print(f"Channel with ID {1312171714272297065} not found.")
+            print(f"Channel with ID {CHANNEL_ID} not found.")
 
     save_stats(stats)
     all_data = get_all_user_data()
@@ -258,7 +269,7 @@ async def on_ready():
     periodic_task.start()
 
     # ID du channel où le bot doit envoyer le message
-    channel_id = 1312171714272297065  # Remplace par l'ID de ton channel
+    channel_id = CHANNEL_ID  # Remplace par l'ID de ton channel
     channel = bot.get_channel(channel_id)
 
     print(f"{bot.user} est connecté à {len(bot.guilds)} serveur(s) :")
