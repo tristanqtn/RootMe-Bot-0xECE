@@ -19,21 +19,24 @@ from bot.controller import (
     get_user_data,
 )
 
-
-
 load_dotenv()
 
 TOKEN = os.getenv("DISCORD_TOKEN")
 CHANNEL_ID = int(os.getenv("CHANNEL_ID"))
-
-
-
 
 intents = discord.Intents.default()
 bot = commands.Bot(command_prefix="!", intents=intents)
 intents.message_content = True
 intents.typing = False
 intents.presences = False
+
+def translate_names(db_name):
+    if db_name == "Mac-812606":
+        return "Mac"
+    elif db_name == "Onyx-852889":
+        return "Onyx"
+    else:
+        return db_name
 
 
 # Fonction pour envoyer un message privé à X lui rappelant son retard
@@ -55,7 +58,7 @@ async def send_race_reminders():
     user2 = "Drachh"  # Utilisateur 2
     user3 = "Snaxx"
 
-    discordUser1 = "756178270830985286"
+    discordUser1 = "688857965553516623"
 
     leaderboard = get_leaderboard()
 
@@ -119,7 +122,7 @@ async def leaderboard(ctx):
     message += "-" * 64 + "\n"
     for i, user in enumerate(leaderboard, start=1):
         commentary = get_commentary(user[1]) if user[0] == "Mac-812606" else ""
-        message += f"{i:<4} {user[0]:<20} {user[1]:>6} {commentary:<30}\n"
+        message += f"{i:<4} {translate_names(user[0]):<20} {user[1]:>6} {commentary:<30}\n"
     message += "```"
 
     # Envoi du message
@@ -141,10 +144,10 @@ async def player_stats(ctx):
     # Création du tableau formaté
     message = "```markdown\n"
     message += "🏆 STATS INDIVIDUELLES DU JOUEUR 🏆\n"
-    if stats[0] == "Mac-812606":
+    if stats[0] == "Mac-812606" and stats[2] < 4000:
         message += "Gros pourri de merde, pas de 4000 pts : pas de stats !\n"
     else:
-        message += f"Hey {user_pseudo}, tu es en train d'arracher ça, regarde-moi ces stats de fou :\n"
+        message += f"Hey {translate_names(user_pseudo)}, tu es en train d'arracher ça, regarde-moi ces stats de fou :\n"
         message += f"{'Place':<12}: {stats[1]}/325710\n"
         message += f"{'Points':<12}: {stats[2]}\n"
         message += f"{'Challenges':<12}: {stats[3]}\n"
@@ -241,7 +244,7 @@ async def periodic_task():
             for user in point_change:
                 # Générer un message aléatoire
                 message = get_random_message(
-                    username=user["Username"],
+                    username=(user["Username"]),
                     increment=user["Increment"],
                     last_challenge=user["Last Challenge"],
                 )

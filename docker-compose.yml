@@ -7,5 +7,5 @@ services:
     image: bot
     restart: always
     environment:
-      - DISCORD_TOKEN = MTMyMTgzNDI4NzExNjMyMDgzOA.G0F6U7.mfTzYHAAjCuqKyaIHltNgHaCis5UoqxFldDrbw
-      - CHANNEL_ID = 1312171714272297065
+      - DISCORD_TOKEN=
+      - CHANNEL_ID=
