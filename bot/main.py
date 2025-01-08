@@ -145,7 +145,11 @@ async def player_stats(ctx):
     message = "```markdown\n"
     message += "🏆 STATS INDIVIDUELLES DU JOUEUR 🏆\n"
     if stats[0] == "Mac-812606" and stats[2] < 4000:
-        message += "Gros pourri de merde, pas de 4000 pts : pas de stats !\n"
+        message += "Toujours pas à 4000 points, t'as compris le principe de la plateforme ?\n"
+        message += f"{'Place':<12}: {stats[1]}/325710\n"
+        message += f"{'Points':<12}: {stats[2]}\n"
+        message += f"{'Challenges':<12}: {stats[3]}\n"
+        message += f"{'Compromissions':<12}: {stats[4]}\n"
     else:
         message += f"Hey {translate_names(user_pseudo)}, tu es en train d'arracher ça, regarde-moi ces stats de fou :\n"
         message += f"{'Place':<12}: {stats[1]}/325710\n"
@@ -280,7 +284,7 @@ async def on_ready():
         print(f"- {guild.name} (ID: {guild.id})")
 
     if channel:
-        await channel.send("Nathan pu du zob 🚀")
+        await channel.send("Yo, je suis dispo 🚀")
     else:
         print("Channel introuvable !")
 
