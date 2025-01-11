@@ -1,5 +1,6 @@
 import os
 import discord  # type: ignore
+import logging  # type: ignore
 
 from dotenv import load_dotenv
 
@@ -19,6 +20,12 @@ from bot.controller import (
     get_user_data,
 )
 
+# Configure logging
+logging.basicConfig(
+    format="[%(asctime)s] [%(levelname)s] | %(message)s",
+    level=logging.DEBUG,  # You can change this to INFO, WARNING, ERROR, etc.
+)
+
 load_dotenv()
 
 TOKEN = os.getenv("DISCORD_TOKEN")
@@ -30,11 +37,25 @@ intents.message_content = True
 intents.typing = False
 intents.presences = False
 
+
 def translate_names(db_name):
     if db_name == "Mac-812606":
         return "Mac"
     elif db_name == "Onyx-852889":
         return "Onyx"
+    elif db_name == "Xeroxx75":
+        return "Xeroxx"
+    else:
+        return db_name
+
+
+def inverse_translate_names(db_name):
+    if db_name == "Mac":
+        return "Mac-812606"
+    elif db_name == "Onyx":
+        return "Onyx-852889"
+    elif db_name == "Xeroxx":
+        return "Xeroxx75"
     else:
         return db_name
 
@@ -47,8 +68,9 @@ async def send_reminder_to_user(user, target_user, points_needed):
             user
         )  # On cherche l'utilisateur pour lui envoyer le message privé
         await target.send(message)  # Envoi du message
+        logging.info(f"Message envoyé avec succès à {user}")
     except discord.DiscordException as e:
-        print(f"Erreur lors de l'envoi du message à {user}: {e}")
+        logging.error(f"Erreur lors de l'envoi du message à {user}: {e}")
 
 
 # Fonction pour envoyer les rappels au démarrage du bot
@@ -90,7 +112,7 @@ async def send_race_reminders():
         if points_needed_for_user1bis > 0:
             await send_reminder_to_user(discordUser1, user3, points_needed_for_user1bis)
         else:
-            print(
+            logging.error(
                 f"Erreur : Les utilisateurs {user1} ou {user2} ou {user3} n'ont pas été trouvés dans la base de données."
             )
 
@@ -101,8 +123,10 @@ async def commandes(ctx):
     message += "🚀 BIENVENUE SUR LE BOT ROOT-ME 🚀\n"
     message += "Voici la liste des commandes disponibles :\n"
     message += "- !leaderboard : Affiche le classement des joueurs de la team\n"
-    message += "- !stats : Affiche tes statistiques ROOT ME\n"
+    message += "- !stats : Affiche tes stats\n"
+    message += "- !stats [pseudo] : Affiche les stats d'un joueur\n"
     message += "- !countdown : Affiche le nombre de jours avant le 1er avril 2025\n"
+    message += "- !lastchallenge : Affiche les derniers challenges de la team\n"
     message += "```"
     await ctx.send(message)
 
@@ -122,7 +146,9 @@ async def leaderboard(ctx):
     message += "-" * 64 + "\n"
     for i, user in enumerate(leaderboard, start=1):
         commentary = get_commentary(user[1]) if user[0] == "Mac-812606" else ""
-        message += f"{i:<4} {translate_names(user[0]):<20} {user[1]:>6} {commentary:<30}\n"
+        message += (
+            f"{i:<4} {translate_names(user[0]):<20} {user[1]:>6} {commentary:<30}\n"
+        )
     message += "```"
 
     # Envoi du message
@@ -130,12 +156,31 @@ async def leaderboard(ctx):
 
 
 @bot.command(name="stats")
-async def player_stats(ctx):
-    # Retrieve user ID that ran the command
-    user_id = ctx.author.id
-    # Get the pseudo of the user that ran the command using DISCORD_USER_IDS
-    user_pseudo = DISCORD_USER_IDS.get(str(user_id))
-    stats = get_user_data(user_pseudo)
+async def player_stats(ctx, player_name: str = None):
+    # If no player name is provided, use the command author's ID
+    if player_name is None:
+        user_id = ctx.author.id
+        user_pseudo = DISCORD_USER_IDS.get(str(user_id))
+    elif player_name == "all" or player_name == "ALL" or player_name == "*":
+        all_data = get_all_user_data()
+        if not all_data:
+            await ctx.send("Il n'y a pas de données dans la base.")
+            return
+        # order by points
+        all_data.sort(key=lambda x: x[2], reverse=True)
+        message = "```markdown\n"
+        message += "🏆 STATS INDIVIDUELLES DE LA TEAM 🏆\n"
+        message += f"{'Utilisateur':<20} {'Place':<12} {'Points':<12} {'Challenges':<12} {'Compromissions':<12} {'Dernier challenge':<30}\n"
+        message += "-" * 100 + "\n"
+        for user in all_data:
+            message += f"{translate_names(user[0]):<20} {user[1]:<12} {user[2]:<12} {user[3]:<12} {user[4]:<12} {user[5]:<30}\n"
+        message += "```"
+        await ctx.send(message)
+        return
+    else:
+        user_pseudo = player_name
+
+    stats = get_user_data(inverse_translate_names(user_pseudo))
 
     if not stats:
         await ctx.send("Il n'y a pas de données dans la base.")
@@ -145,18 +190,16 @@ async def player_stats(ctx):
     message = "```markdown\n"
     message += "🏆 STATS INDIVIDUELLES DU JOUEUR 🏆\n"
     if stats[0] == "Mac-812606" and stats[2] < 4000:
-        message += "Toujours pas à 4000 points, t'as compris le principe de la plateforme ?\n"
-        message += f"{'Place':<12}: {stats[1]}/325710\n"
-        message += f"{'Points':<12}: {stats[2]}\n"
-        message += f"{'Challenges':<12}: {stats[3]}\n"
-        message += f"{'Compromissions':<12}: {stats[4]}\n"
+        message += (
+            "Toujours pas à 4000 points, t'as compris le principe de la plateforme ?\n"
+        )
     else:
         message += f"Hey {translate_names(user_pseudo)}, tu es en train d'arracher ça, regarde-moi ces stats de fou :\n"
-        message += f"{'Place':<12}: {stats[1]}/325710\n"
-        message += f"{'Points':<12}: {stats[2]}\n"
-        message += f"{'Challenges':<12}: {stats[3]}\n"
-        message += f"{'Compromissions':<12}: {stats[4]}\n"
-        message += f"{'Dernier challenge':<12}: {stats[5]}\n"
+    message += f"{'Place':<12}: {stats[1]}/325710\n"
+    message += f"{'Points':<12}: {stats[2]}\n"
+    message += f"{'Challenges':<12}: {stats[3]}\n"
+    message += f"{'Compromissions':<12}: {stats[4]}\n"
+    message += f"{'Dernier challenge':<12}: {stats[5]}\n"
     message += "```"
 
     # Envoi du message
@@ -165,9 +208,8 @@ async def player_stats(ctx):
 
 @bot.command(name="refresh")
 async def refresh(ctx):
-    await ctx.send("Données en cours de mise à jour ...")
     await ctx.send(
-        "Cela peut prendre quelques secondes, veuillez patienter (bot busy)..."
+        "Données en cours de mise à jour cela peut prendre quelques secondes..."
     )
 
     init_db()
@@ -186,19 +228,19 @@ async def refresh(ctx):
                 )
                 await channel.send(message)
         else:
-            print(f"Channel with ID {CHANNEL_ID} not found.")
+            logging.error(f"Channel with ID {CHANNEL_ID} not found.")
     save_stats(stats)
     all_data = get_all_user_data()
 
     if all_data:
-        print("The data has been updated")
+        logging.info("The data has been updated")
         for row in all_data:
-            print(
+            logging.info(
                 f"Username: {row[0]}, Place: {row[1]}, Points: {row[2]}, Challenges: {row[3]}, Compromissions: {row[4]}"
             )
         await ctx.send("Les données ont été mises à jour.")
     else:
-        print("Aucune donnée enregistrée dans la base.")
+        logging.info("Aucune donnée enregistrée dans la base.")
 
 
 @bot.command(name="countdown")
@@ -236,6 +278,22 @@ async def countdown(ctx):
     await ctx.send(message)
 
 
+@bot.command(name="lastchallenge")
+async def lastchallenge(ctx):
+    # display all the last challenges of the team
+    user_data = get_all_user_data()
+    message = "```markdown\n"
+    message += "🏆 DERNIERS CHALLENGES DE LA TEAM 🏆\n"
+    message += f"{'Utilisateur':<20} {'Dernier challenge':<30}\n"
+    message += "-" * 64 + "\n"
+    for user in user_data:
+        message += f"{translate_names(user[0]):<20} {user[5]:<30}\n"
+    message += "```"
+
+    # Envoi du message
+    await ctx.send(message)
+
+
 @tasks.loop(minutes=5)
 async def periodic_task():
     init_db()
@@ -254,24 +312,24 @@ async def periodic_task():
                 )
                 await channel.send(message)
         else:
-            print(f"Channel with ID {CHANNEL_ID} not found.")
+            logging.info(f"Channel with ID {CHANNEL_ID} not found.")
 
     save_stats(stats)
     all_data = get_all_user_data()
 
     if all_data:
-        print("Data updated")
+        logging.info("Data updated")
         for row in all_data:
-            print(
-                f"Username: {row[0]}, Place: {row[1]}, Points: {row[2]}, Challenges: {row[3]}, Compromissions: {row[4]}"
+            logging.info(
+                f"Username: {row[0]}, Place: {row[1]}, Points: {row[2]}, Challenges: {row[3]}, Compromissions: {row[4]}, Last Challenge: {row[5]}"
             )
     else:
-        print("Aucune donnée enregistrée dans la base.")
+        logging.info("Aucune donnée enregistrée dans la base.")
 
 
 @bot.event
 async def on_ready():
-    print(f"{bot.user} is online!")
+    logging.info(f"{bot.user} is online!")
 
     periodic_task.start()
 
@@ -279,14 +337,14 @@ async def on_ready():
     channel_id = CHANNEL_ID  # Remplace par l'ID de ton channel
     channel = bot.get_channel(channel_id)
 
-    print(f"{bot.user} est connecté à {len(bot.guilds)} serveur(s) :")
+    logging.info(f"{bot.user} est connecté à {len(bot.guilds)} serveur(s) :")
     for guild in bot.guilds:
-        print(f"- {guild.name} (ID: {guild.id})")
+        logging.info(f"- {guild.name} (ID: {guild.id})")
 
     if channel:
-        await channel.send("Yo, je suis dispo 🚀")
+        await channel.send("Yo, je suis la V2 🚀")
     else:
-        print("Channel introuvable !")
+        logging.error("Channel introuvable !")
 
     await send_race_reminders()
 

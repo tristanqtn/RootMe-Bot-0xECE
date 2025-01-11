@@ -1,13 +1,20 @@
 import asyncio
 import aiohttp  # type: ignore
 from bs4 import BeautifulSoup  # type: ignore
+import logging
+
+# Configure logging
+logging.basicConfig(
+    format="[%(asctime)s] [%(levelname)s] | %(message)s",
+    level=logging.DEBUG,  # You can change this to INFO, WARNING, ERROR, etc.
+)
 
 BASE_URL = "https://www.root-me.org"
 ROOT_ME_USERS = [
     "Drachh",
     "Kalith",
     "Hioav2",
-    "RoiDechu",
+    "ManJiRaw",
     "Mac-812606",
     "draune",
     "Snaxx",
@@ -18,23 +25,55 @@ ROOT_ME_USERS = [
 ]
 
 
-# Define a function to fetch user information with better error handling and timeout
+MAX_RETRIES = 3  # Maximum number of retries for connection-related issues
+RETRY_DELAY = 5  # Delay between retries in seconds
+
+
+# Define a function to fetch user data with retries
 async def get_user_data(username):
     url = f"{BASE_URL}/{username}"
-    try:
-        # Use aiohttp to make the request asynchronously
-        async with aiohttp.ClientSession() as session:
-            async with session.get(
-                url, timeout=20
-            ) as response:  # Timeout set to 10 seconds
-                response.raise_for_status()  # Raise an exception for HTTP errors
-                return await response.text()  # Await the response text asynchronously
-    except asyncio.TimeoutError:
-        print(f"Request timed out while fetching data for {username}")
-        return None
-    except aiohttp.ClientError as e:
-        print(f"Error fetching data for {username}: {e}")
-        return None
+    attempt = 0
+
+    while attempt < MAX_RETRIES:
+        try:
+            # Use aiohttp to make the request asynchronously
+            async with aiohttp.ClientSession() as session:
+                async with session.get(
+                    url, timeout=20
+                ) as response:  # Timeout set to 20 seconds
+                    response.raise_for_status()  # Raise an exception for HTTP errors
+
+                    # Handle rate-limiting (HTTP 429)
+                    if response.status == 429:
+                        retry_after = response.headers.get("Retry-After")
+                        retry_delay = int(retry_after) if retry_after else RETRY_DELAY
+                        logging.debug(
+                            f"Rate-limited. Retrying after {retry_delay} seconds..."
+                        )
+                        await asyncio.sleep(retry_delay)
+                        continue  # Retry the request
+
+                    return (
+                        await response.text()
+                    )  # Await the response text asynchronously
+
+        except asyncio.TimeoutError:
+            logging.debug(
+                f"Request timed out while fetching data for {username}. Attempt {attempt + 1}/{MAX_RETRIES}"
+            )
+            break  # Stop retrying if timeout occurs
+
+        except aiohttp.ClientError as e:
+            logging.error(
+                f"Error fetching data for {username}: {e}. Attempt {attempt + 1}/{MAX_RETRIES}"
+            )
+            attempt += 1
+            if attempt >= MAX_RETRIES:
+                logging.error(f"Max retries reached for {username}.")
+                break
+            await asyncio.sleep(RETRY_DELAY)  # Wait before retrying
+
+    return None
 
 
 # Parse the user data (extracting relevant details)
@@ -60,7 +99,7 @@ def parse_user_data(username, data):
             # Store the result
             results[label] = value
 
-        # Print the results for the current user
+        # logging.info the results for the current user
         for label, value in results.items():
             stats[label] = value
 
@@ -72,7 +111,7 @@ def parse_user_data(username, data):
             stats["Last Challenge"] = last_challenge
             return stats
     else:
-        print(f"Failed to fetch or parse data for {username}.")
+        logging.info(f"Failed to fetch or parse data for {username}.")
         return None
 
 

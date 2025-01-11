@@ -7,5 +7,6 @@ services:
     image: bot
     restart: always
     environment:
+      # never add "" to the values
       - DISCORD_TOKEN=
       - CHANNEL_ID=
