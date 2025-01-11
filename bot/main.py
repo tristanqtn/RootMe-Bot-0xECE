@@ -69,10 +69,10 @@ async def commandes(ctx):
     message = "```markdown\n"
     message += "🚀 BIENVENUE SUR LE BOT ROOT-ME 🚀\n"
     message += "Voici la liste des commandes disponibles :\n"
-    message += "- !commandes : Affiche la liste des commandes disponibles\n"
-    message += "- !status : Affiche le statut du bot\n"
-    message += "- !leaderboard : Affiche le classement des joueurs de la team\n"
-    message += "- !lastchallenge : Affiche les derniers challenges de la team\n"
+    message += "- /commandes : Affiche la liste des commandes disponibles\n"
+    message += "- /status : Affiche le statut du bot\n"
+    message += "- /leaderboard : Affiche le classement des joueurs de la team\n"
+    message += "- /lastchallenge : Affiche les derniers challenges de la team\n"
     message += "```"
     await ctx.send(message)
 
@@ -130,7 +130,7 @@ async def remove_user(ctx, pseudo: str):
     await ctx.send(result)
 
 
-@bot.command(name="leaderboard")
+@bot.command(name="classement")
 async def leaderboard(ctx):
     leaderboard = get_leaderboard()
 
