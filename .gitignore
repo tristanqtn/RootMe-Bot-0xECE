@@ -2,6 +2,7 @@
 # Edit at https://www.toptal.com/developers/gitignore?templates=python
 
 rootme_data.db
+users.db
 
 ### Python ###
 # Byte-compiled / optimized / DLL files
