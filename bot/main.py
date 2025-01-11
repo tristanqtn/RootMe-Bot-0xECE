@@ -30,6 +30,7 @@ load_dotenv()
 
 TOKEN = os.getenv("DISCORD_TOKEN")
 CHANNEL_ID = int(os.getenv("CHANNEL_ID"))
+ENV = os.getenv("ENV")
 
 intents = discord.Intents.default()
 bot = commands.Bot(command_prefix="!", intents=intents)
@@ -116,12 +117,18 @@ async def send_race_reminders():
                 f"Erreur : Les utilisateurs {user1} ou {user2} ou {user3} n'ont pas été trouvés dans la base de données."
             )
 
+@bot.command(name="status")
+async def status(ctx):
+    await ctx.send(f"Je suis en ligne !\nJe tourne depuis l'env de {ENV}🚀")
+
 
 @bot.command(name="commandes")
 async def commandes(ctx):
     message = "```markdown\n"
     message += "🚀 BIENVENUE SUR LE BOT ROOT-ME 🚀\n"
     message += "Voici la liste des commandes disponibles :\n"
+    message += "- !commandes : Affiche la liste des commandes disponibles\n"
+    message += "- !status : Affiche le statut du bot\n"
     message += "- !leaderboard : Affiche le classement des joueurs de la team\n"
     message += "- !stats : Affiche tes stats\n"
     message += "- !stats [pseudo] : Affiche les stats d'un joueur\n"
@@ -161,6 +168,10 @@ async def player_stats(ctx, player_name: str = None):
     if player_name is None:
         user_id = ctx.author.id
         user_pseudo = DISCORD_USER_IDS.get(str(user_id))
+
+    if player_name == "poat":
+        user_pseudo = "Onyx-852889"
+
     elif player_name == "all" or player_name == "ALL" or player_name == "*":
         all_data = get_all_user_data()
         if not all_data:
@@ -278,6 +289,7 @@ async def countdown(ctx):
     await ctx.send(message)
 
 
+
 @bot.command(name="lastchallenge")
 async def lastchallenge(ctx):
     # display all the last challenges of the team
@@ -343,6 +355,7 @@ async def on_ready():
 
     if channel:
         await channel.send("Yo, je suis la V2 🚀")
+        await channel.send(f"Je tourne depuis l'env de {ENV}🚀\nPour voir la liste des commandes disponibles, tapez !commandes")
     else:
         logging.error("Channel introuvable !")
 

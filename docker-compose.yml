@@ -10,3 +10,4 @@ services:
       # never add "" to the values
       - DISCORD_TOKEN=
       - CHANNEL_ID=
+      - ENV=prod
