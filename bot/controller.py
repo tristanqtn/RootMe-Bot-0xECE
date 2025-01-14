@@ -92,7 +92,7 @@ def add_user_to_fetch(database_path, pseudo):
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS rootme_users (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                pseudo TEXT UNIQUE NOT NULL
+                pseudo TEXT NOT NULL
             )
         ''')
 

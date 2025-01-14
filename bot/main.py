@@ -85,14 +85,6 @@ async def add_user(ctx, pseudo: str):
         ctx: Le contexte de la commande.
         pseudo (str): Le pseudo Root-Me de l'utilisateur.
     """
-    # Validation basique du pseudo
-    if not pseudo:
-        await ctx.send("Veuillez fournir un pseudo valide.")
-        return
-    if not pseudo.isalnum() or len(pseudo) < 3:
-        await ctx.send("Le pseudo fourni n'est pas valide. Assurez-vous qu'il est alphanumérique et contient au moins 3 caractères.")
-        return
-
     # Traduction du pseudo si nécessaire
     db_pseudo = inverse_translate_names(pseudo)
 
@@ -191,7 +183,7 @@ async def lastchallenge(ctx):
     await ctx.send(message)
 
 
-@tasks.loop(minutes=15)
+@tasks.loop(minutes=1440)
 async def periodic_task():
     init_db()
     stats = await fetch_and_parse_users()
